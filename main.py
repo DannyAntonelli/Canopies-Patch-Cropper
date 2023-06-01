@@ -196,7 +196,7 @@ def crop_patches(
                 ),
             )
 
-            key = cv2.waitKey(100)
+            key = cv2.waitKey(10)
 
         if key == ord("q"):
             break
