@@ -5,6 +5,8 @@ from math import sqrt
 import random
 import os
 
+import copy
+
 import numpy as np
 
 
@@ -55,7 +57,21 @@ def draw_patches(
             (patch[0], patch[1]),
             (patch[0] + patch_size, patch[1] + patch_size),
             (0, 255, 0),
-            2,
+            3,
+        )
+
+
+def save_patches(
+    image: np.ndarray[int, np.dtype[np.generic]],
+    patches: list[tuple[int, int]],
+    patch_size: int,
+    output_path: str,
+) -> None:
+    for patch in patches:
+        cv2.imwrite(
+            output_path
+            + f"_{patch[0]}_{patch[1]}_{patch[0] + patch_size}_{patch[1] + patch_size}.jpg",
+            image[patch[1] : patch[1] + patch_size, patch[0] : patch[0] + patch_size],
         )
 
 
@@ -69,6 +85,7 @@ def crop_patches(
 
     for image_path in os.listdir(images_path):
         image = cv2.imread(os.path.join(images_path, image_path))
+
         rows, cols, _ = image.shape
 
         patches = generate_patches(
@@ -83,6 +100,7 @@ def crop_patches(
             y_mean=rows / 3,
             y_std=rows / 4,
         )
+        initial_image = copy.deepcopy(image)
         draw_patches(image, patches, patch_size)
 
         cv2.imshow(WINDOW_NAME, image)
@@ -92,11 +110,23 @@ def crop_patches(
         if key == ord("q"):
             break
 
+        if key == ord("s"):
+            save_patches(
+                initial_image,
+                patches,
+                patch_size,
+                os.path.join(output_path, image_path[:-4]),
+            )
+
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--images_path", type=str, default="data/preprocessed")
-    parser.add_argument("--output_path", type=str, default="data/patches")
+    parser.add_argument(
+        "--images_path", type=str, default=os.path.join("data", "images\\")
+    )
+    parser.add_argument(
+        "--output_path", type=str, default=os.path.join("data", "patches\\")
+    )
     parser.add_argument("--patch_size", type=int, default=300)
     parser.add_argument("--num_patches", type=int, default=5)
     args = parser.parse_args()
