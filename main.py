@@ -1,12 +1,9 @@
 import argparse
-import cv2
-
-from math import sqrt
-import random
-import os
-
 import copy
+import os
+import random
 
+import cv2
 import numpy as np
 
 
