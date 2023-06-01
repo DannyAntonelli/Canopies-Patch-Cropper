@@ -12,6 +12,11 @@ import numpy as np
 
 WINDOW_NAME = "Canopies Patch Cropper"
 
+REGENERATE_ALL_KEY = ord(" ")
+REGENERATE_PARTIAL_KEY = ord("r")
+SAVE_KEY = ord("s")
+QUIT_KEY = ord("q")
+
 
 class MoveState:
     def __init__(
@@ -152,11 +157,11 @@ def crop_patches(
         rows, cols, _ = initial_image.shape
         move_state = MoveState()
 
-        key = ord(" ")
-        while key == ord(" ") or key == ord("r") or key == -1:
+        key = REGENERATE_ALL_KEY
+        while key == REGENERATE_ALL_KEY or key == REGENERATE_PARTIAL_KEY or key == -1:
             image = copy.deepcopy(initial_image)
 
-            if key == ord(" "):
+            if key == REGENERATE_ALL_KEY:
                 patches = generate_patches(
                     patch_size=patch_size,
                     num_patches=num_patches,
@@ -169,7 +174,7 @@ def crop_patches(
                     y_mean=rows / 3,
                     y_std=rows / 4,
                 )
-            elif key == ord("r"):
+            elif key == REGENERATE_PARTIAL_KEY:
                 patches.extend(
                     generate_patches(
                         patch_size=patch_size,
@@ -198,10 +203,10 @@ def crop_patches(
 
             key = cv2.waitKey(10)
 
-        if key == ord("q"):
+        if key == QUIT_KEY:
             break
 
-        if key == ord("s"):
+        if key == SAVE_KEY:
             save_patches(
                 initial_image,
                 patches,
