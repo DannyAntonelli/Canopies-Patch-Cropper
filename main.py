@@ -83,6 +83,16 @@ def save_patches(
         )
 
 
+def find_patch(patches: list[tuple[int, int]], patch_size: int, x: int, y: int) -> int:
+    for i, patch in enumerate(patches):
+        if (
+            patch[0] <= x <= patch[0] + patch_size
+            and patch[1] <= y <= patch[1] + patch_size
+        ):
+            return i
+    return -1
+
+
 def move_patches(
     event: int,
     x: int,
@@ -95,20 +105,13 @@ def move_patches(
     move_state: MoveState,
 ) -> None:
     if event == cv2.EVENT_LBUTTONDOWN:
-        for patch in patches:
-            if (
-                patch[0] <= x <= patch[0] + patch_size
-                and patch[1] <= y <= patch[1] + patch_size
-            ):
-                move_state.current_position = (x, y)
-                move_state.patch_moving = patches.index(patch)
+        move_state.patch_moving = find_patch(patches, patch_size, x, y)
+        if move_state.patch_moving != -1:
+            move_state.current_position = (x, y)
     elif event == cv2.EVENT_RBUTTONDOWN:
-        for patch in patches:
-            if (
-                patch[0] <= x <= patch[0] + patch_size
-                and patch[1] <= y <= patch[1] + patch_size
-            ):
-                patches.remove(patch)
+        idx = find_patch(patches, patch_size, x, y)
+        if idx != -1:
+            patches.pop(idx)
     elif event == cv2.EVENT_LBUTTONUP:
         move_state.current_position = (-1, -1)
 
