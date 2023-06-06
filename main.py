@@ -6,6 +6,9 @@ import random
 import cv2
 import numpy as np
 
+# reproducibility
+random.seed(42)
+np.random.seed(42)
 
 WINDOW_NAME = "Canopies Patch Cropper"
 
@@ -77,12 +80,24 @@ def save_patches(
     patch_size: int,
     output_path: str,
 ) -> None:
-    for patch in patches:
-        cv2.imwrite(
-            output_path
-            + f"_{patch[0]}_{patch[1]}_{patch[0] + patch_size}_{patch[1] + patch_size}.jpg",
-            image[patch[1] : patch[1] + patch_size, patch[0] : patch[0] + patch_size],
-        )
+    # open a text file for yolo annotations and save the patches
+    with  open(output_path + ".txt", "w") as f:
+        for i, patch in enumerate(patches):
+            # save the patch cutting it with yolo format
+            cv2.imwrite(
+                output_path + f"_{i:02d}.jpg",
+                image[patch[1]: patch[1] + patch_size, patch[0]: patch[0] + patch_size],
+            )
+            # calculate the center of the patch
+            x_center = patch[0] + patch_size / 2
+            y_center = patch[1] + patch_size / 2
+            # normalize the center coordinates
+            x_center /= image.shape[1]
+            y_center /= image.shape[0]
+            # write the annotation
+            f.write(f"0 {x_center} {y_center} {patch_size /image.shape[1]} {patch_size /image.shape[0]}\n")
+
+
 
 
 def find_patch(patches: list[tuple[int, int]], patch_size: int, x: int, y: int) -> int:
